@@ -1,11 +1,11 @@
 import { Reducer, combineReducers } from 'redux';
 
-import { UsersReducer } from './users-reducer';
+import { UsersReducer } from './user-reducer';
 import { ThreadsReducer } from './threads-reducer';
 
 import { AppState } from "../state";
 
-export * from './users-reducer';
+export * from './user-reducer';
 export * from './threads-reducer';
 
 const appReducer: Reducer<AppState> = combineReducers<AppState>({

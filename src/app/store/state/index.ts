@@ -1,7 +1,7 @@
 import { ThreadsState } from "./threads-state";
-import { UsersState } from "./users-state";
+import { UserState } from "./user-state";
 
 export interface AppState {
-  users: UsersState;
+  user: UserState;
   threads: ThreadsState;
 }

@@ -4,7 +4,7 @@ import * as moment from 'moment';
 
 import { Thread, User } from './model';
 import { AppState } from "./store/state";
-import { ThreadsActions, UsersActions } from "./store/actions";
+import { ThreadsActions, UserActions } from "./store/actions";
 import { getAllMessages } from "./store/reducers";
 
 /**
@@ -75,7 +75,7 @@ let tWait: Thread = {
 export default function ChatExampleData(store: Store<AppState>) {
 
   // set the current User
-  store.dispatch(UsersActions.setCurrentUser(me));
+  store.dispatch(UserActions.setCurrentUser(me));
 
   // create a new thread and add messages
   store.dispatch(ThreadsActions.addThread(tLadycap));

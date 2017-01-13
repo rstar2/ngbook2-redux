@@ -1,13 +1,13 @@
-import { User } from "../../model/model";
+import { User } from "../../model";
 
 /**
  * This file describes the state concerning Users, how to modify it through
  * the reducer, and the selectors.
  */
-export interface UsersState {
+export interface UserState {
   currentUser: User;
 }
 
-export const initialState: UsersState = {
+export const initialState: UserState = {
   currentUser: null
 };

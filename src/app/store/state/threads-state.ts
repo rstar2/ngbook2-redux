@@ -1,4 +1,4 @@
-import { Thread } from "../../model/model";
+import { Thread } from "../../model";
 
 /**
  * This file describes the state concerning Threads, how to modify them through
