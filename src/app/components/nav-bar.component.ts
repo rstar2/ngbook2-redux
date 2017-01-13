@@ -1,8 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { MessageService, ThreadService } from '../services';
-import { Message, Thread } from '../model';
-import * as _ from 'lodash';
+import { Component, Inject } from "@angular/core";
+import { Store } from "redux";
 
+import { APP_STORE_TOKEN } from "../store/app-store";
+import { AppState } from "../store/state";
+import { getUnreadMessagesCount } from "../store/reducers";
+
+/**
+ * ChatNavBarComponent shows the header and unread count
+ */
 @Component({
   selector: 'chat-nav-bar',
   template: `
@@ -10,48 +15,28 @@ import * as _ from 'lodash';
     <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-brand" href="https://ng-book.com/2">
-          <img src="assets/images/logos/ng-book-2-minibook.png"/>
+          <img src="${require('assets/images/logos/ng-book-2-minibook.png')}"/>
            ng-book 2
         </a>
       </div>
       <p class="navbar-text navbar-right">
         <button class="btn btn-primary" type="button">
-          Messages <span class="badge">{{unreadMessagesCount}}</span>
+          Messages <span class="badge">{{ unreadMessagesCount }}</span>
         </button>
       </p>
     </div>
   </nav>
   `
 })
-export class ChatNavBarComponent implements OnInit {
-  private unreadMessagesCount: number;
+export class ChatNavBarComponent  {
+  unreadMessagesCount: number;
 
-  constructor(private messageService: MessageService,
-              private threadService: ThreadService) {
+  constructor(@Inject(APP_STORE_TOKEN) private store: Store<AppState>) {
+    store.subscribe(() => this.updateState());
+    this.updateState();
   }
 
-  ngOnInit(): void {
-    this.messageService.messages
-      .combineLatest(
-        this.threadService.getCurrentThread(),
-        (messages: Message[], currentThread: Thread) =>
-          [currentThread, messages])
-
-      .subscribe(([currentThread, messages]: [Thread, Message[]]) => {
-        this.unreadMessagesCount =
-          _.reduce(
-            messages,
-            (sum: number, m: Message) => {
-              let messageIsInCurrentThread: boolean = m.thread &&
-                currentThread &&
-                (currentThread.id === m.thread.id);
-              if (m && !m.isRead && !messageIsInCurrentThread) {
-                sum = sum + 1;
-              }
-              return sum;
-            },
-            0);
-      });
+  updateState() {
+    this.unreadMessagesCount = getUnreadMessagesCount(this.store.getState());
   }
 }
-

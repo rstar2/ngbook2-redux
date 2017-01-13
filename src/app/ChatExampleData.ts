@@ -17,31 +17,31 @@ const me: User = {
   id: uuid(),
   isClient: true, // <-- notice we're specifying the client as this User
   name: 'Juliet',
-  avatarSrc: require('images/avatars/female-avatar-1.png')
+  avatarSrc: require('assets/images/avatars/female-avatar-1.png')
 };
 
 const ladycap: User = {
   id: uuid(),
   name: 'Lady Capulet',
-  avatarSrc: require('images/avatars/female-avatar-2.png')
+  avatarSrc: require('assets/images/avatars/female-avatar-2.png')
 };
 
 const echo: User = {
   id: uuid(),
   name: 'Echo Bot',
-  avatarSrc: require('images/avatars/male-avatar-1.png')
+  avatarSrc: require('assets/images/avatars/male-avatar-1.png')
 };
 
 const rev: User = {
   id: uuid(),
   name: 'Reverse Bot',
-  avatarSrc: require('images/avatars/female-avatar-4.png')
+  avatarSrc: require('assets/images/avatars/female-avatar-4.png')
 };
 
 let wait: User = {
   id: uuid(),
   name: 'Waiting Bot',
-  avatarSrc: require('images/avatars/male-avatar-2.png')
+  avatarSrc: require('assets/images/avatars/male-avatar-2.png')
 };
 
 let tLadycap: Thread = {

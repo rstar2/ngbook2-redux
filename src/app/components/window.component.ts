@@ -1,57 +1,18 @@
-import { Component, OnInit, ElementRef, ChangeDetectionStrategy } from '@angular/core';
-import { MessageService, ThreadService, UserService } from '../services';
-import { Observable } from 'rxjs';
-import { User, Thread, Message } from '../model';
+import { Inject, ElementRef, Component } from "@angular/core";
+import { Store } from "redux";
 
-@Component({
-  inputs: ['message'],
-  selector: 'chat-message',
-  template: `
-  <div class="msg-container"
-       [ngClass]="{'base-sent': !incoming, 'base-receive': incoming}">
+import { Thread, User } from "../model";
 
-    <div class="avatar"
-         *ngIf="!incoming">
-      <img src="{{message.author.avatarSrc}}">
-    </div>
+import { APP_STORE_TOKEN } from "../store/app-store";
+import { AppState } from "../store/state";
+import { ThreadsActions } from "../store/actions";
+import { getCurrentThread, getCurrentUser } from "../store/reducers";
 
-    <div class="messages"
-      [ngClass]="{'msg-sent': !incoming, 'msg-receive': incoming}">
-      <p>{{message.text}}</p>
-      <p class="time">{{message.sender}} • {{message.sentAt | fromNow}}</p>
-    </div>
-
-    <div class="avatar"
-         *ngIf="incoming">
-      <img src="{{message.author.avatarSrc}}">
-    </div>
-  </div>
-  `
-})
-export class ChatMessageComponent implements OnInit {
-  private message: Message;
-  private currentUser: User;
-  private incoming: boolean;
-
-  constructor(private userService: UserService) {
-  }
-
-  ngOnInit(): void {
-    this.userService.getCurrentUser()
-      .subscribe(
-        (user: User) => {
-          this.currentUser = user;
-          if (this.message.author && user) {
-            this.incoming = this.message.author.id !== user.id;
-          }
-        });
-  }
-
-}
-
+/**
+ * ChatWindowComponent is the container which handles the current chat
+ */
 @Component({
   selector: 'chat-window',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="chat-window-container">
       <div class="chat-window">
@@ -65,21 +26,21 @@ export class ChatMessageComponent implements OnInit {
                   Chat - {{currentThread.name}}
                 </h3>
               </div>
-              <div class="panel-buttons-container">
+              <div class="panel-buttons-container"  >
                 <!-- you could put minimize or close buttons here -->
               </div>
             </div>
 
             <div class="panel-body msg-container-base">
               <chat-message
-                   *ngFor="let message of messages | async"
+                   *ngFor="let message of currentThread.messages"
                    [message]="message">
               </chat-message>
             </div>
 
             <div class="panel-footer">
               <div class="input-group">
-                <input type="text" 
+                <input type="text"
                        class="chat-input"
                        placeholder="Write your message here..."
                        (keydown.enter)="onEnter($event)"
@@ -98,59 +59,48 @@ export class ChatMessageComponent implements OnInit {
     </div>
   `
 })
-export class ChatWindowComponent implements OnInit {
-  private messages: Observable<Message[]>;
-  private currentThread: Thread;
-  private draftMessage: Message;
-  private currentUser: User;
+export class ChatWindowComponent {
+  currentThread: Thread;
+  draftMessage: { text: string };
+  currentUser: User;
 
-  constructor(private messageService: MessageService,
-              private threadService: ThreadService,
-              private userService: UserService,
+  constructor(@Inject(APP_STORE_TOKEN) private store: Store<AppState>,
               private el: ElementRef) {
+    store.subscribe(() => this.updateState() );
+    this.updateState();
+    this.draftMessage = { text: '' };
   }
 
-  ngOnInit(): void {
-    this.messages = this.threadService.currentThreadMessages;
-
-    this.draftMessage = new Message();
-
-    this.threadService.getCurrentThread()
-      .subscribe((thread: Thread) => {
-        this.currentThread = thread;
-      });
-
-    this.userService.getCurrentUser()
-      .subscribe((user: User) => {
-        this.currentUser = user;
-      });
-
-    this.messages
-      .subscribe((messages: Array<Message>) => {
-        setTimeout(() => {
-          this.scrollToBottom();
-        });
-      });
-  }
-
-  onEnter(event: any): void {
-    this.sendMessage();
-    event.preventDefault();
-  }
-
-  sendMessage(): void {
-    let m: Message = this.draftMessage;
-    m.author = this.currentUser;
-    m.thread = this.currentThread;
-    m.isRead = true;
-    this.messageService.addMessage(m);
-    this.draftMessage = new Message();
+  updateState() {
+    let state = this.store.getState();
+    this.currentThread = getCurrentThread(state);
+    this.currentUser = getCurrentUser(state);
+    this.scrollToBottom();
   }
 
   scrollToBottom(): void {
     let scrollPane: any = this.el
       .nativeElement.querySelector('.msg-container-base');
-    scrollPane.scrollTop = scrollPane.scrollHeight;
+    if (scrollPane) {
+      setTimeout(() => scrollPane.scrollTop = scrollPane.scrollHeight);
+    }
+  }
+
+  sendMessage(): void {
+    this.store.dispatch(ThreadsActions.addMessage(
+      this.currentThread,
+      {
+        author: this.currentUser,
+        isRead: true,
+        text: this.draftMessage.text
+      }
+    ));
+    this.draftMessage = { text: '' };
+  }
+
+  onEnter(event: any): void {
+    this.sendMessage();
+    event.preventDefault();
   }
 
 }
