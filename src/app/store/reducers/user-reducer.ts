@@ -4,8 +4,9 @@ import { Action } from "redux";
 import { User } from "../../model";
 import { UserState, initialState } from "../state/user-state";
 import { UserActions } from "../actions";
+import { AppState } from "../state";
 
-export const UsersReducer =
+export const UserReducer =
   function (state: UserState = initialState, action: Action): UserState {
     switch (action.type) {
       case UserActions.SET_CURRENT_USER:
@@ -18,8 +19,8 @@ export const UsersReducer =
     }
   };
 
-const getUsersState = (state): UserState => state.user;
+const getUserState = (state: AppState): UserState => state.user;
 
 export const getCurrentUser = createSelector(
-  getUsersState,
+  getUserState,
   (state: UserState) => state.currentUser);

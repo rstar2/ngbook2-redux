@@ -4,6 +4,7 @@ import { Action } from "redux";
 import { Thread, Message } from "../../model";
 import { ThreadsState, initialState, ThreadsEntities } from "../state/threads-state";
 import { ThreadsActions } from "../actions";
+import { AppState } from "../state";
 
 
 /**
@@ -87,7 +88,7 @@ export const ThreadsReducer =
     }
   };
 
-export const getThreadsState = (state): ThreadsState => state.threads;
+const getThreadsState = (state: AppState): ThreadsState => state.threads;
 
 export const getThreadsEntities = createSelector(
   getThreadsState,
